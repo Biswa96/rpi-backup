@@ -57,7 +57,6 @@ build \
 --buildtarget=RELEASE \
 -D SECURE_BOOT_ENABLE=TRUE \
 -D INCLUDE_TFTP_COMMAND=TRUE \
--D ACPI_BASIC_MODE_ENABLE=1 \
 --platform=edk2-platforms/Platform/RaspberryPi/RPi4/RPi4.dsc
 
 #
