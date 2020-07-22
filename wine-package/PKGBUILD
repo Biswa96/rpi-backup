@@ -1,0 +1,148 @@
+# Maintainer: Sven-Hendrik Haase <sh@lutzhaase.com>
+# Contributor: Jan "heftig" Steffens <jan.steffens@gmail.com>
+# Contributor: Eduardo Romero <eduardo@archlinux.org>
+# Contributor: Giovanni Scafora <giovanni@archlinux.org>
+
+# AArch64 changes:
+#  * removed all lib32 dependencies
+#  * build only for ARM 64 bit aka. AArch64 architecture
+#  * use clang as gcc does not support __builtin_ms_va_list for AArch64
+
+pkgname=wine
+pkgver=5.13
+pkgrel=1
+
+_pkgbasever=${pkgver/rc/-rc}
+
+source=(https://dl.winehq.org/wine/source/5.x/$pkgname-$_pkgbasever.tar.xz{,.sign}
+        30-win32-aliases.conf
+        wine-binfmt.conf)
+sha256sums=('c46a5c1c2aaf41993de5a5e78b7780060e0e77066531d0ca672ae08e325e0152'
+            'SKIP'
+            '9901a5ee619f24662b241672a7358364617227937d5f6d3126f70528ee5111e7'
+            '6dfdefec305024ca11f35ad7536565f5551f09119dda2028f194aee8f77077a4')
+validpgpkeys=(5AC1A08B03BD7A313E0A955AF5E6E9EEB9461DD7
+              DA23579A74D4AD9AF9D3F945CEFAC8EAAF17519D)
+
+pkgdesc="A compatibility layer for running Windows programs"
+url="http://www.winehq.com"
+arch=(aarch64)
+options=(staticlibs)
+license=(LGPL)
+depends=(
+  fontconfig
+  lcms2
+  libxml2
+  libxcursor
+  libxrandr
+  libxdamage
+  libxi
+  gettext
+  freetype2
+  glu
+  libsm
+  gcc-libs
+  libpcap
+  faudio
+  desktop-file-utils
+)
+makedepends=(autoconf ncurses bison perl fontforge flex
+  'clang>=5.0'
+  giflib
+  libpng
+  gnutls
+  libxinerama
+  libxcomposite
+  libxmu
+  libxxf86vm
+  libldap
+  mpg123
+  openal
+  v4l-utils
+  libpulse
+  alsa-lib
+  mesa
+  mesa-libgl
+  opencl-icd-loader
+  libxslt
+  gst-plugins-base-libs
+  vulkan-icd-loader
+  vkd3d
+  sdl2
+  libcups
+  libgphoto2
+  sane
+  gsm
+  vulkan-headers
+  samba
+  opencl-headers
+)
+optdepends=(
+  giflib
+  libpng
+  libldap
+  gnutls
+  mpg123
+  openal
+  v4l-utils
+  libpulse
+  alsa-plugins
+  alsa-lib
+  libjpeg-turbo
+  libxcomposite
+  libxinerama
+  ncurses
+  opencl-icd-loader
+  libxslt
+  gst-plugins-base-libs
+  vkd3d
+  sdl2
+  libgphoto2
+  sane
+  gsm
+  cups
+  samba
+  dosbox
+)
+makedepends=(${makedepends[@]} ${depends[@]})
+install=wine.install
+
+prepare() {
+  # Allow ccache to work
+  mv $pkgname-$_pkgbasever $pkgname
+}
+
+build() {
+  cd "$srcdir"
+
+  export CC="/usr/bin/clang"
+  export CXX="/usr/bin/clang++"
+  export CFLAGS="-ggdb -Wno-enum-conversion -Wno-absolute-value"
+  export CXXFLAGS="-ggdb -Wno-enum-conversion -Wno-absolute-value"
+
+  mkdir $pkgname-build
+  cd "$srcdir/$pkgname-build"
+  ../$pkgname/configure \
+    --prefix=/usr \
+    --libdir=/usr/lib \
+    --disable-tests \
+    --disable-win16 \
+    --enable-win64
+
+  make
+}
+
+package() {
+  cd "$srcdir/$pkgname-build"
+  make prefix="$pkgdir/usr" \
+    libdir="$pkgdir/usr/lib" \
+    dlldir="$pkgdir/usr/lib/wine" install
+
+  # Font aliasing settings for Win32 applications
+  install -d "$pkgdir"/etc/fonts/conf.{avail,d}
+  install -m644 "$srcdir/30-win32-aliases.conf" "$pkgdir/etc/fonts/conf.avail"
+  ln -s ../conf.avail/30-win32-aliases.conf "$pkgdir/etc/fonts/conf.d/30-win32-aliases.conf"
+  install -Dm 644 "$srcdir/wine-binfmt.conf" "$pkgdir/usr/lib/binfmt.d/wine.conf"
+}
+
+# vim:set ts=8 sts=2 sw=2 et:
