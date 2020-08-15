@@ -9,7 +9,7 @@
 #  * use clang as gcc does not support __builtin_ms_va_list for AArch64
 
 pkgname=wine
-pkgver=5.14
+pkgver=5.15
 pkgrel=1
 
 _pkgbasever=${pkgver/rc/-rc}
@@ -17,12 +17,11 @@ _pkgbasever=${pkgver/rc/-rc}
 source=(https://dl.winehq.org/wine/source/5.x/$pkgname-$_pkgbasever.tar.xz{,.sign}
         30-win32-aliases.conf
         wine-binfmt.conf)
-sha256sums=('f442613537e90e67dbe8a5c4968c8bdb9a101a267892bb9ff67317e0b67fc9ef'
+sha256sums=('3f267cfcd4775bfdeddb1b2a592b875291f5e2dccdebce55f9b2012f7c670915'
             'SKIP'
             '9901a5ee619f24662b241672a7358364617227937d5f6d3126f70528ee5111e7'
             '6dfdefec305024ca11f35ad7536565f5551f09119dda2028f194aee8f77077a4')
-validpgpkeys=(5AC1A08B03BD7A313E0A955AF5E6E9EEB9461DD7
-              DA23579A74D4AD9AF9D3F945CEFAC8EAAF17519D)
+validpgpkeys=('DA23579A74D4AD9AF9D3F945CEFAC8EAAF17519D') # Alexandre Julliard <julliard@winehq.org>
 
 pkgdesc="A compatibility layer for running Windows programs"
 url="http://www.winehq.com"
